@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - PathAI{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    {% if active_goal %}
+    <div class="context-header">
+        <h1>{{ user.username }}, {{ user.age|default:"?" }} years old</h1>
+        {% if user.industry %}<p class="role">{{ user.industry }}</p>{% endif %}
+        <p class="mission">Current mission: {{ active_goal.progress_percentage }}% to "{{ active_goal.title }}"</p>
+    </div>
+
+    <div class="quest-path">
+        <h2>Tier {{ active_goal.current_tier }}</h2>
+        <div class="quests-container">
+            {% for quest in quests %}
+            <div class="quest-card {% if quest.is_completed %}completed{% endif %}" data-quest-id="{{ quest.id }}">
+                <div class="quest-checkbox" onclick="toggleQuest({{ quest.id }})">
+                    {% if quest.is_completed %}✓{% endif %}
+                </div>
+                <div class="quest-content">
+                    <h3>{{ quest.title }}</h3>
+                    {% if quest.description %}
+                    <p>{{ quest.description }}</p>
+                    {% endif %}
+                </div>
+                <div class="quest-actions">
+                    <button class="action-btn" title="Decompose" onclick="decomposeQuest({{ quest.id }})">↗</button>
+                </div>
+            </div>
+            {% empty %}
+            <p class="no-quests">No active quests. Create a goal to start!</p>
+            {% endfor %}
+        </div>
+
+        {% if goals %}
+        <div class="tier-preview">
+            <h3>Locked Tiers</h3>
+            <div class="locked-tiers">
+                {% for i in "123456789"|make_list %}
+                    {% if forloop.counter > active_goal.current_tier %}
+                    <div class="tier-box locked">
+                        <span class="lock-icon">🔒</span>
+                        <span>Tier {{ forloop.counter }}</span>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h2>Welcome, {{ user.username }}!</h2>
+        <p>Create your first goal to begin your journey.</p>
+        <button class="btn-primary" id="emptyQuickAddBtn">+ Create Goal</button>
+    </div>
+    {% endif %}
+</div>
+
+<div class="confetti-container" id="confetti"></div>
+{% endblock %}

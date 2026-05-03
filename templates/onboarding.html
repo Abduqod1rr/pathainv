@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join PathAI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1>Welcome to PathAI</h1>
+            <p class="tagline">Your journey starts here</p>
+
+            <form method="post" action="{% url 'onboarding' %}" class="auth-form">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" required placeholder="Choose your name">
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" required placeholder="Create a password">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Age</label>
+                        <input type="number" name="age" min="1" max="120" placeholder="Your age">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Industry</label>
+                        <select name="industry">
+                            <option value="">Select industry</option>
+                            <option value="technology">Technology</option>
+                            <option value="business">Business</option>
+                            <option value="creative">Creative Arts</option>
+                            <option value="health">Health & Medicine</option>
+                            <option value="education">Education</option>
+                            <option value="science">Science</option>
+                            <option value="sports">Sports</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Interests</label>
+                    <input type="text" name="interests" placeholder="What interests you? (comma separated)">
+                </div>
+
+                <div class="form-group">
+                    <label>Current Activity</label>
+                    <select name="activity_type">
+                        <option value="">Select your current situation</option>
+                        <option value="student">Student</option>
+                        <option value="employed">Employed</option>
+                        <option value="self_employed">Self-Employed</option>
+                        <option value="entrepreneur">Entrepreneur</option>
+                        <option value="career_changer">Career Changer</option>
+                        <option value="hobbyist">Hobbyist</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-primary btn-full">Start Your Journey</button>
+            </form>
+
+            <p class="auth-switch">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+        </div>
+    </div>
+</body>
+</html>

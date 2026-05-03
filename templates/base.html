@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PathAI{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>PathAI</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="{% url 'dashboard' %}" class="nav-item">
+                    <span class="icon">🎯</span>
+                    <span>Current Path</span>
+                </a>
+                <a href="{% url 'orbit' %}" class="nav-item">
+                    <span class="icon">🪐</span>
+                    <span>Orbit</span>
+                </a>
+                <a href="{% url 'archive' %}" class="nav-item">
+                    <span class="icon">🏆</span>
+                    <span>Archive</span>
+                </a>
+                <a href="{% url 'identity' %}" class="nav-item">
+                    <span class="icon">👤</span>
+                    <span>Identity</span>
+                </a>
+            </nav>
+            <div class="user-status">
+                <p class="user-name">{{ user.username }}</p>
+                {% if user.age %}<p class="user-info">{{ user.age }} years old</p>{% endif %}
+                {% if user.industry %}<p class="user-info">{{ user.industry }}</p>{% endif %}
+            </div>
+            <div class="logout">
+                <a href="{% url 'logout' %}">Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="progress-section">
+                    {% if active_goal %}
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ active_goal.progress_percentage }}%"></div>
+                    </div>
+                    <span class="progress-text">{{ active_goal.progress_percentage }}%</span>
+                    {% endif %}
+                </div>
+                <div class="tier-status">
+                    {% if active_goal %}
+                    <span>Tier {{ active_goal.current_tier }}: {{ active_goal.completed_quests }}/100 Quest</span>
+                    {% endif %}
+                </div>
+                <button class="quick-add" id="quickAddBtn">+</button>
+            </header>
+
+            {% block content %}{% endblock %}
+        </main>
+
+        <div class="fab" id="fabBtn" title="AI Helper">🤖</div>
+    </div>
+
+    <div class="modal" id="quickAddModal">
+        <div class="modal-content">
+            <h3>New Goal</h3>
+            <input type="text" id="goalInput" placeholder="What is your goal?">
+            <button class="btn-primary" id="createGoalBtn">Create Roadmap</button>
+            <button class="btn-close" id="closeModal">×</button>
+        </div>
+    </div>
+    {% else %}
+    {% block auth_content %}{% endblock %}
+    {% endif %}
+
+    <script src="/static/script.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

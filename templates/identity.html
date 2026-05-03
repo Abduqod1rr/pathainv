@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Identity - PathAI{% endblock %}
+
+{% block content %}
+<div class="identity-view">
+    <h2>Your Profile</h2>
+    <form method="post" class="identity-form">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" value="{{ user.username }}" disabled>
+        </div>
+
+        <div class="form-group">
+            <label>Age</label>
+            <input type="number" name="age" value="{{ user.age|default:'' }}" min="1" max="120">
+        </div>
+
+        <div class="form-group">
+            <label>Industry</label>
+            <select name="industry">
+                <option value="">Select industry</option>
+                <option value="technology" {% if user.industry == 'technology' %}selected{% endif %}>Technology</option>
+                <option value="business" {% if user.industry == 'business' %}selected{% endif %}>Business</option>
+                <option value="creative" {% if user.industry == 'creative' %}selected{% endif %}>Creative Arts</option>
+                <option value="health" {% if user.industry == 'health' %}selected{% endif %}>Health & Medicine</option>
+                <option value="education" {% if user.industry == 'education' %}selected{% endif %}>Education</option>
+                <option value="science" {% if user.industry == 'science' %}selected{% endif %}>Science</option>
+                <option value="sports" {% if user.industry == 'sports' %}selected{% endif %}>Sports</option>
+                <option value="other" {% if user.industry == 'other' %}selected{% endif %}>Other</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Interests</label>
+            <input type="text" name="interests" value="{{ user.interests }}" placeholder="Comma separated">
+        </div>
+
+        <div class="form-group">
+            <label>Current Activity</label>
+            <select name="activity_type">
+                <option value="">Select situation</option>
+                <option value="student" {% if user.activity_type == 'student' %}selected{% endif %}>Student</option>
+                <option value="employed" {% if user.activity_type == 'employed' %}selected{% endif %}>Employed</option>
+                <option value="self_employed" {% if user.activity_type == 'self_employed' %}selected{% endif %}>Self-Employed</option>
+                <option value="entrepreneur" {% if user.activity_type == 'entrepreneur' %}selected{% endif %}>Entrepreneur</option>
+                <option value="career_changer" {% if user.activity_type == 'career_changer' %}selected{% endif %}>Career Changer</option>
+                <option value="hobbyist" {% if user.activity_type == 'hobbyist' %}selected{% endif %}>Hobbyist</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn-primary">Save Changes</button>
+    </form>
+</div>
+{% endblock %}
