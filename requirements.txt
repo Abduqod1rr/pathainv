@@ -3,3 +3,5 @@ djangorestframework>=3.14
 psycopg2-binary>=2.9
 python-dotenv>=1.0
 groq>=0.4
+gunicorn>=21.0
+whitenoise>=6.0
