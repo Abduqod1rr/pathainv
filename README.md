@@ -65,7 +65,29 @@ python manage.py runserver
 
 ## Deployment
 
-### Option 1: Static Frontend (Recommended for full local storage)
+### Option 1: Render (Recommended)
+
+1. Push code to GitHub:
+```bash
+git add .
+git commit -m "Add deployment config"
+git push origin main
+```
+
+2. Create a Web Service on [Render](https://render.com):
+   - Connect your GitHub repo
+   - Build Command: `pip install -r requirements.txt && python manage.py migrate`
+   - Start Command: `gunicorn pathai.wsgi --bind 0.0.0.0:$PORT`
+
+3. Add Environment Variables in Render dashboard:
+   - `GROQ_API_KEY`: your Groq API key
+   - `SECRET_KEY`: generate a secure key
+   - `DEBUG`: `False`
+   - `DATABASE_URL`: will be auto-created by Render (PostgreSQL)
+
+4. Your app will be live at `https://your-app.onrender.com`
+
+### Option 2: Static Frontend (Recommended for full local storage)
 
 The frontend is entirely client-side and can be deployed to any static hosting:
 
