@@ -7,10 +7,16 @@ import json
 
 
 def index(request):
+    if not request.user.is_authenticated:
+        from django.shortcuts import redirect
+        return redirect('login_page')
     return render(request, 'index.html')
 
 
 def login_page(request):
+    if request.user.is_authenticated:
+        from django.shortcuts import redirect
+        return redirect('index')
     return render(request, 'login.html')
 
 
