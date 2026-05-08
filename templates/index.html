@@ -72,6 +72,22 @@
       </div>
 
       <div class="drawer-section">
+        <div class="drawer-row" style="cursor:pointer" onclick="exportData()">
+          <div class="drawer-row-left">
+            <i class="fas fa-download"></i>
+            <span>Export Data</span>
+          </div>
+        </div>
+        <div class="drawer-row" style="cursor:pointer" onclick="document.getElementById('importFile').click()">
+          <div class="drawer-row-left">
+            <i class="fas fa-upload"></i>
+            <span>Import Data</span>
+          </div>
+        </div>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      </div>
+
+      <div class="drawer-section">
         <div class="drawer-row" style="cursor:pointer" onclick="logout()">
           <div class="drawer-row-left">
             <i class="fas fa-sign-out-alt"></i>

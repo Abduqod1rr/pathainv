@@ -434,6 +434,59 @@ function logout() {
   });
 }
 
+function exportData() {
+  const data = {
+    version: '1.0',
+    exportDate: new Date().toISOString(),
+    goals: state.goals,
+    profile: state.profile,
+    settings: state.settings
+  };
+  
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `pathai-backup-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Data exported successfully');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      
+      if (!data.goals || !Array.isArray(data.goals)) {
+        showToast('Invalid backup file');
+        return;
+      }
+      
+      if (!confirm('This will replace all your current goals. Continue?')) {
+        return;
+      }
+      
+      state.goals = data.goals;
+      if (data.profile) state.profile = data.profile;
+      if (data.settings) state.settings = data.settings;
+      saveState();
+      renderMain();
+      showToast('Data imported successfully');
+    } catch (err) {
+      showToast('Error reading file');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
 // ================================================================
 //  Navigate
 // ================================================================
