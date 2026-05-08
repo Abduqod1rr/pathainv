@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="/static/main.css">
+  <link rel="stylesheet" href="main.css">
 </head>
 <body>
   <div class="app-wrapper">
@@ -68,7 +68,31 @@
             <span>O'zbek</span>
             <i class="fas fa-check lang-check" id="check-uz" style="display:none"></i>
           </div>
+          <!-- <div class="lang-option disabled">
+            <span class="lang-flag">🇷🇺</span>
+            <span>Русский</span>
+            <span class="coming-soon">Soon</span>
+          </div>
+          <div class="lang-option disabled">
+            <span class="lang-flag">🇩🇪</span>
+            <span>Deutsch</span>
+            <span class="coming-soon">Soon</span>
+          </div>
+          <div class="lang-option disabled">
+            <span class="lang-flag">🇫🇷</span>
+            <span>Français</span>
+            <span class="coming-soon">Soon</span>
+          </div> -->
         </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-section-title">Gemini API Key</div>
+        <div class="api-key-wrap">
+          <input type="password" id="apiKeyInput" class="api-input" placeholder="Enter Gemini API Key...">
+          <button class="api-save-btn" onclick="saveApiKey()"><i class="fas fa-check"></i></button>
+        </div>
+        <p class="api-hint">Get your key at <a href="https://aistudio.google.com/apikey" target="_blank" class="api-link">aistudio.google.com</a></p>
       </div>
 
       <div class="drawer-footer">
@@ -135,6 +159,6 @@
     </div>
   </div>
 
-  <script src="/static/index.js"></script>
+  <script src="index.js"></script>
 </body>
 </html>

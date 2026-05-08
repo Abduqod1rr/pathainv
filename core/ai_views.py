@@ -15,7 +15,7 @@ def generate_roadmap(request):
     try:
         data = json.loads(request.body)
         goal_title = data.get('title', '')
-        user_context = data.get('context', {})
+        profile = data.get('profile', {})
         
         if not goal_title:
             return JsonResponse({'error': 'No goal title'}, status=400)
@@ -23,25 +23,43 @@ def generate_roadmap(request):
         client = Groq(api_key=settings.GROQ_API_KEY)
         
         context_parts = []
-        if user_context.get('age'):
-            context_parts.append(f"Age: {user_context['age']}")
-        if user_context.get('industry'):
-            context_parts.append(f"Industry: {user_context['industry']}")
+        if profile.get('name'):
+            context_parts.append(f"Name: {profile['name']}")
+        if profile.get('bio'):
+            context_parts.append(f"About: {profile['bio']}")
+        if profile.get('interests'):
+            context_parts.append(f"Interests: {profile['interests']}")
         
-        context_str = ', '.join(context_parts) if context_parts else 'General'
+        context_str = '\n'.join(context_parts) if context_parts else 'No specific profile info'
         
-        prompt = f"""Generate 100 quests for "{goal_title}". 
-Format: [{{"tier":1,"order":1,"title":"..."}}]
-10 per tier, 10 tiers."""
+        prompt = f"""You are an expert goal-achievement coach. Create a structured 10-tier learning roadmap.
+
+User Profile:
+{context_str}
+
+Goal: "{goal_title}"
+
+Rules:
+- Exactly 10 tiers, absolute beginner to mastery
+- Each tier has exactly 10 concrete, actionable quests
+- Tier titles should be short and descriptive (e.g. "Tier 1: Foundations")
+- Quests should be specific to the goal
+
+Respond with ONLY valid JSON (no markdown), format:
+{{"tiers":[
+  {{"title":"Tier 1: Foundations","quests":["quest1","quest2","quest3","quest4","quest5","quest6","quest7","quest8","quest9","quest10"]}},
+  {{"title":"Tier 2: Getting Started","quests":["quest1",...]}},
+  ...10 tiers total...
+]}}"""
 
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[
-                {"role": "system", "content": "Goal roadmap generator. Return ONLY valid JSON array."},
+                {"role": "system", "content": "You are a helpful AI that generates learning roadmaps."},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.7,
-            max_tokens=6000
+            temperature=0.8,
+            max_tokens=8000
         )
         
         content = response.choices[0].message.content.strip()
@@ -54,18 +72,14 @@ Format: [{{"tier":1,"order":1,"title":"..."}}]
         if content.endswith("```"):
             content = content[:-3]
         
-        quests = json.loads(content.strip())
+        result = json.loads(content.strip())
         
-        # Ensure we have 100 quests
-        if len(quests) < 100:
-            # Pad with generic quests
-            while len(quests) < 100:
-                tier = (len(quests) // 10) + 1
-                order = (len(quests) % 10) + 1
-                quests.append({"tier": tier, "order": order, "title": f"Continue working on {goal_title}"})
+        # Validate and normalize
+        if not isinstance(result.get('tiers'), list):
+            raise ValueError('Invalid response format')
         
-        logger.info(f"Generated {len(quests)} quests for goal: {goal_title}")
-        return JsonResponse({'quests': quests[:100]})
+        logger.info(f"Generated roadmap for goal: {goal_title}")
+        return JsonResponse(result)
         
     except json.JSONDecodeError as e:
         logger.error(f"JSON decode error: {e}")
