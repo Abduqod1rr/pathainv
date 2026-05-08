@@ -430,7 +430,7 @@ function logout() {
     state.goals = [];
     isAuthenticated = false;
     localStorage.removeItem('pathai_v2');
-    showAuthModal();
+    window.location.href = '/login/';
   });
 }
 

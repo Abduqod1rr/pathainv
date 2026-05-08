@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Pathai</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-1: #0f0a1a;
+      --bg-2: #1a1428;
+      --bg-3: #241d35;
+      --text-1: #f0e6ff;
+      --text-2: #a89ec9;
+      --text-3: #6b5a7a;
+      --accent: #8b5cf6;
+      --accent-hover: #a78bfa;
+      --danger: #ef4444;
+      --success: #22c55e;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg-1);
+      color: var(--text-1);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .auth-container {
+      width: 100%;
+      max-width: 420px;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: var(--bg-2);
+      border-radius: 16px;
+      padding: 40px;
+      border: 1px solid var(--bg-3);
+    }
+
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .auth-logo h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -1px;
+    }
+
+    .auth-logo p {
+      color: var(--text-2);
+      font-size: 14px;
+      margin-top: 8px;
+    }
+
+    .auth-title {
+      font-size: 24px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      color: var(--text-2);
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--bg-1);
+      border: 1px solid var(--bg-3);
+      border-radius: 10px;
+      color: var(--text-1);
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: var(--accent);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-3);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .auth-switch {
+      text-align: center;
+      margin-top: 24px;
+      color: var(--text-2);
+      font-size: 14px;
+    }
+
+    .auth-switch a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .auth-switch a:hover {
+      text-decoration: underline;
+    }
+
+    .error-msg {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .extra-fields {
+      display: none;
+    }
+
+    .extra-fields.show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <h1>Pathai</h1>
+        <p>AI-powered goal roadmap</p>
+      </div>
+
+      <h2 class="auth-title" id="authTitle">Login</h2>
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      <form id="authForm" onsubmit="handleAuth(event)">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" class="form-input" id="username" placeholder="Enter username" required>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" class="form-input" id="password" placeholder="Enter password" required>
+        </div>
+
+        <div class="extra-fields" id="extraFields">
+          <div class="form-group">
+            <label>About you (optional)</label>
+            <input type="text" class="form-input" id="bio" placeholder="Tell us about yourself">
+          </div>
+
+          <div class="form-group">
+            <label>Interests (optional)</label>
+            <input type="text" class="form-input" id="interests" placeholder="Your interests">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary" id="submitBtn">
+          <span id="btnText">Login</span>
+        </button>
+      </form>
+
+      <p class="auth-switch">
+        <span id="switchText">Don't have an account?</span>
+        <a href="#" onclick="toggleMode(event)"> <span id="switchAction">Register</span></a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    let isRegisterMode = false;
+
+    function toggleMode(e) {
+      e.preventDefault();
+      isRegisterMode = !isRegisterMode;
+      updateUI();
+    }
+
+    function updateUI() {
+      document.getElementById('authTitle').textContent = isRegisterMode ? 'Create Account' : 'Login';
+      document.getElementById('btnText').textContent = isRegisterMode ? 'Register' : 'Login';
+      document.getElementById('switchText').textContent = isRegisterMode ? 'Already have an account?' : "Don't have an account?";
+      document.getElementById('switchAction').textContent = isRegisterMode ? 'Login' : 'Register';
+      document.getElementById('extraFields').classList.toggle('show', isRegisterMode);
+      hideError();
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('errorMsg');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    function hideError() {
+      document.getElementById('errorMsg').style.display = 'none';
+    }
+
+    async function handleAuth(e) {
+      e.preventDefault();
+      hideError();
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const bio = document.getElementById('bio').value.trim();
+      const interests = document.getElementById('interests').value.trim();
+
+      if (!username || !password) {
+        showError('Please fill in all required fields');
+        return;
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Please wait...';
+
+      const endpoint = isRegisterMode ? '/api/register/' : '/api/login/';
+      const body = { username, password };
+      if (isRegisterMode) {
+        body.bio = bio;
+        body.interests = interests;
+      }
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          window.location.href = '/';
+        } else {
+          showError(data.error || 'Authentication failed');
+        }
+      } catch (err) {
+        showError('Connection error. Please try again.');
+      }
+
+      btn.disabled = false;
+      btn.textContent = isRegisterMode ? 'Register' : 'Login';
+    }
+  </script>
+</body>
+</html>
