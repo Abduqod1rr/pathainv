@@ -108,6 +108,7 @@ function t(key, vars = {}) {
 //  State
 // ================================================================
 let state = {
+  userId: null,
   goals: [],
   profile: { name: '', surname: '', bio: '', interests: '' },
   settings: { language: 'en', theme: 'dark' }
@@ -119,6 +120,8 @@ let currentGoalId = null;
 let currentTierIdx = 0;
 let editingQuestRef = null;
 let deletingGoalId  = null;
+let isRegisterMode = false;
+let isAuthenticated = false;
 
 // ================================================================
 //  Persistence
@@ -151,8 +154,19 @@ function deepMerge(target, source) {
 // ================================================================
 //  Boot
 // ================================================================
-window.onload = () => {
+window.onload = async () => {
   loadState();
+  
+  // Check if user is logged in on server
+  if (state.userId) {
+    await checkAuth();
+  }
+  
+  if (!isAuthenticated) {
+    showAuthModal();
+    return;
+  }
+  
   applyTheme();
   initDrawer();
   initResizer();
@@ -312,6 +326,112 @@ function showToast(msg) {
   el.classList.add('show');
   clearTimeout(_toastTimer);
   _toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+// ================================================================
+//  Auth
+// ================================================================
+function showAuthModal() {
+  document.getElementById('authOverlay').classList.remove('hidden');
+  document.getElementById('authModal').classList.remove('hidden');
+  document.getElementById('auth-username').value = '';
+  document.getElementById('auth-password').value = '';
+  document.getElementById('auth-bio').value = '';
+  document.getElementById('auth-interests').value = '';
+  updateAuthUI();
+}
+
+function closeAuthModal() {
+  document.getElementById('authOverlay').classList.add('hidden');
+  document.getElementById('authModal').classList.add('hidden');
+}
+
+function toggleAuthMode() {
+  isRegisterMode = !isRegisterMode;
+  updateAuthUI();
+}
+
+function updateAuthUI() {
+  document.getElementById('auth-title').textContent = isRegisterMode ? 'Create Account' : 'Login';
+  document.getElementById('auth-btn-text').textContent = isRegisterMode ? 'Register' : 'Login';
+  document.getElementById('auth-toggle-text').textContent = isRegisterMode ? 'Already have an account?' : "Don't have an account?";
+  document.getElementById('auth-toggle-action').textContent = isRegisterMode ? 'Login' : 'Register';
+  document.getElementById('auth-bio').style.display = isRegisterMode ? 'block' : 'none';
+  document.getElementById('auth-interests').style.display = isRegisterMode ? 'block' : 'none';
+}
+
+async function handleAuth() {
+  const username = document.getElementById('auth-username').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const bio = document.getElementById('auth-bio').value.trim();
+  const interests = document.getElementById('auth-interests').value.trim();
+  
+  if (!username || !password) {
+    showToast('Please fill in all required fields');
+    return;
+  }
+  
+  const endpoint = isRegisterMode ? '/api/register/' : '/api/login/';
+  const body = { username, password };
+  if (isRegisterMode) {
+    body.bio = bio;
+    body.interests = interests;
+  }
+  
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok && data.success) {
+      state.userId = data.user.id;
+      state.profile.name = data.user.username;
+      state.profile.bio = data.user.bio || '';
+      state.profile.interests = data.user.interests || '';
+      isAuthenticated = true;
+      saveState();
+      closeAuthModal();
+      showToast(isRegisterMode ? 'Account created!' : 'Welcome back!');
+      navigate('home');
+    } else {
+      showToast(data.error || 'Authentication failed');
+    }
+  } catch (err) {
+    showToast('Connection error');
+  }
+}
+
+async function checkAuth() {
+  try {
+    const response = await fetch('/api/user/');
+    if (response.ok) {
+      const user = await response.json();
+      state.userId = user.id;
+      state.profile.name = user.username;
+      state.profile.bio = user.bio || '';
+      state.profile.interests = user.interests || '';
+      isAuthenticated = true;
+      saveState();
+    } else {
+      isAuthenticated = false;
+    }
+  } catch (err) {
+    isAuthenticated = false;
+  }
+}
+
+function logout() {
+  fetch('/api/logout/', { method: 'POST' }).then(() => {
+    state.userId = null;
+    state.goals = [];
+    isAuthenticated = false;
+    localStorage.removeItem('pathai_v2');
+    showAuthModal();
+  });
 }
 
 // ================================================================

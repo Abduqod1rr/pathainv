@@ -71,6 +71,15 @@
         </div>
       </div>
 
+      <div class="drawer-section">
+        <div class="drawer-row" style="cursor:pointer" onclick="logout()">
+          <div class="drawer-row-left">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </div>
+        </div>
+      </div>
+
       <div class="drawer-footer">
         <span>Pathai v1.1</span>
         <span>·</span>
@@ -132,6 +141,28 @@
         <button class="secondary-btn" onclick="closeDeleteModal()" id="txt-cancel">Cancel</button>
         <button class="danger-btn" onclick="confirmDelete()" id="txt-delete">Delete</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ===== Auth Modals ===== -->
+  <div class="modal-overlay hidden" id="authOverlay" onclick="closeAuthModal()"></div>
+  <div class="modal hidden" id="authModal">
+    <div class="modal-header">
+      <h3 id="auth-title">Login</h3>
+      <button class="modal-close-btn" onclick="closeAuthModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="text" class="modal-input" id="auth-username" placeholder="Username">
+      <input type="password" class="modal-input" id="auth-password" placeholder="Password">
+      <input type="text" class="modal-input" id="auth-bio" placeholder="About you (optional)" style="display:none">
+      <input type="text" class="modal-input" id="auth-interests" placeholder="Interests (optional)" style="display:none">
+      <button class="primary-btn" id="auth-btn" onclick="handleAuth()">
+        <span id="auth-btn-text">Login</span>
+      </button>
+      <p class="auth-switch" style="text-align:center;margin-top:16px;font-size:14px;color:var(--text-3)">
+        <span id="auth-toggle-text">Don't have an account?</span> 
+        <a href="#" onclick="toggleAuthMode()" style="color:var(--accent)"> <span id="auth-toggle-action">Register</span></a>
+      </p>
     </div>
   </div>
 
