@@ -142,8 +142,10 @@ function loadState() {
 async function loadGoalsFromServer() {
   try {
     const response = await fetch('/api/goals/');
+    console.log('loadGoalsFromServer response:', response.ok);
     if (response.ok) {
       const data = await response.json();
+      console.log('loadGoalsFromServer data:', data);
       state.goals = [];
       if (data.goals && data.goals.length > 0) {
         state.goals = data.goals.map(g => ({
@@ -154,10 +156,11 @@ async function loadGoalsFromServer() {
           currentTier: 0,
           tiers: g.tiers
         }));
+        console.log('state.goals after loading:', state.goals);
       }
     }
   } catch (err) {
-    console.error('Failed to load goals from server');
+    console.error('Failed to load goals from server:', err);
   }
 }
 
@@ -713,8 +716,12 @@ function renderMain() {
 //  Goal Detail
 // ================================================================
 function openGoal(goalId) {
+  console.log('openGoal called with:', goalId, typeof goalId);
   currentGoalId = Number(goalId);
+  console.log('currentGoalId set to:', currentGoalId, typeof currentGoalId);
+  console.log('state.goals:', state.goals);
   const goal = getGoal(currentGoalId);
+  console.log('getGoal result:', goal);
   if (!goal) return;
   currentTierIdx = goal.currentTier || 0;
   renderSidebar();
