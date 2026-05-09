@@ -388,10 +388,15 @@ async function handleAuth() {
     const data = await response.json();
     
     if (response.ok && data.success) {
-      // Clear old data - new user should have fresh start
-      localStorage.removeItem('pathai_v2');
-      state.goals = [];
-      state.userId = data.user.id;
+      const oldUserId = state.userId;
+      const newUserId = data.user.id;
+      
+      // If new user (different account), clear old goals
+      if (oldUserId && oldUserId !== newUserId) {
+        state.goals = [];
+      }
+      
+      state.userId = newUserId;
       state.profile.name = data.user.username;
       state.profile.bio = data.user.bio || '';
       state.profile.interests = data.user.interests || '';
