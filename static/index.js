@@ -712,8 +712,8 @@ function renderMain() {
 //  Goal Detail
 // ================================================================
 function openGoal(goalId) {
-  currentGoalId = goalId;
-  const goal = getGoal(goalId);
+  currentGoalId = parseInt(goalId);
+  const goal = getGoal(currentGoalId);
   if (!goal) return;
   currentTierIdx = goal.currentTier || 0;
   renderSidebar();
@@ -907,7 +907,7 @@ function saveNote() {
 //  Delete
 // ================================================================
 function openDeleteModal(goalId) {
-  deletingGoalId = goalId;
+  deletingGoalId = parseInt(goalId);
   setEl('txt-delete-heading', t('delete.goal'));
   setEl('txt-delete-confirm', t('delete.confirm'));
   setEl('txt-cancel', t('cancel'));
