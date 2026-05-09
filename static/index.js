@@ -139,6 +139,27 @@ function loadState() {
   } catch(_) {}
 }
 
+async function loadGoalsFromServer() {
+  try {
+    const response = await fetch('/api/goals/');
+    if (response.ok) {
+      const data = await response.json();
+      if (data.goals && data.goals.length > 0) {
+        state.goals = data.goals.map(g => ({
+          id: g.id,
+          title: g.title,
+          createdAt: new Date(g.created_at).getTime(),
+          status: 'active',
+          currentTier: 0,
+          tiers: g.tiers
+        }));
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load goals from server');
+  }
+}
+
 function deepMerge(target, source) {
   const out = { ...target };
   for (const key of Object.keys(source)) {
@@ -166,6 +187,9 @@ window.onload = async () => {
     showAuthModal();
     return;
   }
+  
+  // Load goals from server
+  await loadGoalsFromServer();
   
   applyTheme();
   initDrawer();
@@ -885,12 +909,18 @@ function closeDeleteModal() {
   hide('deleteModal');
 }
 
-function confirmDelete() {
+async function confirmDelete() {
   if (!deletingGoalId) return;
+  
+  try {
+    await fetch(`/api/goals/${deletingGoalId}/delete/`, { method: 'DELETE' });
+  } catch (err) {
+    console.error('Failed to delete from server');
+  }
+  
   state.goals = state.goals.filter(g => g.id !== deletingGoalId);
   if (currentGoalId === deletingGoalId) currentGoalId = null;
   deletingGoalId = null;
-  saveState();
   closeDeleteModal();
   renderSidebar();
   renderMain();
@@ -933,16 +963,28 @@ async function createGoal() {
 
   try {
     const tiers = await callAI(title);
+    
+    const response = await fetch('/api/goals/create/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, tiers })
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to save goal');
+    }
+    
+    const data = await response.json();
     const goal = {
-      id: 'g' + Date.now(),
-      title,
-      createdAt: Date.now(),
+      id: data.goal.id,
+      title: data.goal.title,
+      createdAt: new Date(data.goal.created_at).getTime(),
       status: 'active',
       currentTier: 0,
-      tiers
+      tiers: data.goal.tiers
     };
+    
     state.goals.push(goal);
-    saveState();
 
     closeCreateGoal();
     currentGoalId = goal.id;

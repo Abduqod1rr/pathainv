@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import login, logout, authenticate
-from .models import User
+from .models import User, Goal
 import json
 
 
@@ -105,3 +105,100 @@ def get_user(request):
             'interests': request.user.interests or ''
         })
     return JsonResponse({'error': 'Not authenticated'}, status=401)
+
+
+def get_goals(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Not authenticated'}, status=401)
+    
+    goals = Goal.objects.filter(user=request.user).values('id', 'title', 'tiers', 'created_at', 'updated_at')
+    return JsonResponse({'goals': list(goals)})
+
+
+@csrf_exempt
+def create_goal(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Not authenticated'}, status=401)
+    
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        title = data.get('title', '').strip()
+        tiers = data.get('tiers', [])
+        
+        if not title:
+            return JsonResponse({'error': 'Title required'}, status=400)
+        
+        goal = Goal.objects.create(
+            user=request.user,
+            title=title,
+            tiers=tiers
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'goal': {
+                'id': goal.id,
+                'title': goal.title,
+                'tiers': goal.tiers,
+                'created_at': goal.created_at.isoformat(),
+                'updated_at': goal.updated_at.isoformat()
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+def update_goal(request, goal_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Not authenticated'}, status=401)
+    
+    if request.method != 'PUT':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    try:
+        goal = Goal.objects.get(id=goal_id, user=request.user)
+        data = json.loads(request.body)
+        
+        if 'title' in data:
+            goal.title = data['title']
+        if 'tiers' in data:
+            goal.tiers = data['tiers']
+        
+        goal.save()
+        
+        return JsonResponse({
+            'success': True,
+            'goal': {
+                'id': goal.id,
+                'title': goal.title,
+                'tiers': goal.tiers,
+                'created_at': goal.created_at.isoformat(),
+                'updated_at': goal.updated_at.isoformat()
+            }
+        })
+    except Goal.DoesNotExist:
+        return JsonResponse({'error': 'Goal not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+def delete_goal(request, goal_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Not authenticated'}, status=401)
+    
+    if request.method != 'DELETE':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    try:
+        goal = Goal.objects.get(id=goal_id, user=request.user)
+        goal.delete()
+        return JsonResponse({'success': True})
+    except Goal.DoesNotExist:
+        return JsonResponse({'error': 'Goal not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
