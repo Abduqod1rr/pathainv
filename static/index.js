@@ -144,9 +144,10 @@ async function loadGoalsFromServer() {
     const response = await fetch('/api/goals/');
     if (response.ok) {
       const data = await response.json();
+      state.goals = [];
       if (data.goals && data.goals.length > 0) {
         state.goals = data.goals.map(g => ({
-          id: String(g.id),
+          id: g.id,
           title: g.title,
           createdAt: new Date(g.created_at).getTime(),
           status: 'active',
@@ -712,7 +713,7 @@ function renderMain() {
 //  Goal Detail
 // ================================================================
 function openGoal(goalId) {
-  currentGoalId = goalId;
+  currentGoalId = Number(goalId);
   const goal = getGoal(currentGoalId);
   if (!goal) return;
   currentTierIdx = goal.currentTier || 0;
@@ -907,7 +908,7 @@ function saveNote() {
 //  Delete
 // ================================================================
 function openDeleteModal(goalId) {
-  deletingGoalId = goalId;
+  deletingGoalId = Number(goalId);
   setEl('txt-delete-heading', t('delete.goal'));
   setEl('txt-delete-confirm', t('delete.confirm'));
   setEl('txt-cancel', t('cancel'));
@@ -989,7 +990,7 @@ async function createGoal() {
     
     const data = await response.json();
     const goal = {
-      id: String(data.goal.id),
+      id: data.goal.id,
       title: data.goal.title,
       createdAt: new Date(data.goal.created_at).getTime(),
       status: 'active',
