@@ -4,7 +4,11 @@
    Modified to use Django backend for AI
 =============================================================== */
 
-console.log('Pathai JS loaded');
+// Debug - verify JS is loading
+window.onerror = function(msg, url, line) {
+  document.write('<pre style="color:red">JS Error: ' + msg + ' line:' + line + '</pre>');
+};
+console.log('Pathai JS loading...');
 
 // ================================================================
 //  i18n
