@@ -167,16 +167,6 @@ async function loadGoalsFromServer() {
     console.error('Failed to load goals from server:', err);
   }
 }
-      } catch (parseErr) {
-        console.error('JSON parse error:', parseErr.message);
-        console.error('Response text (first 500 chars):', text.substring(0, 500));
-        state.goals = [];
-      }
-    }
-  } catch (err) {
-    console.error('Failed to load goals from server:', err);
-  }
-}
 
 function deepMerge(target, source) {
   const out = { ...target };
