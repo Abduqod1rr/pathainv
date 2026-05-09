@@ -146,7 +146,7 @@ async function loadGoalsFromServer() {
       const data = await response.json();
       if (data.goals && data.goals.length > 0) {
         state.goals = data.goals.map(g => ({
-          id: g.id,
+          id: String(g.id),
           title: g.title,
           createdAt: new Date(g.created_at).getTime(),
           status: 'active',
@@ -712,7 +712,7 @@ function renderMain() {
 //  Goal Detail
 // ================================================================
 function openGoal(goalId) {
-  currentGoalId = parseInt(goalId);
+  currentGoalId = goalId;
   const goal = getGoal(currentGoalId);
   if (!goal) return;
   currentTierIdx = goal.currentTier || 0;
@@ -815,7 +815,7 @@ function toggleQuest(goalId, tierIdx, questIdx) {
   checkTierCompletion(goal, tierIdx);
   
   // Sync to server
-  fetch(`/api/goals/${goalId}/`, {
+  fetch(`/api/goals/${parseInt(goalId)}/`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ title: goal.title, tiers: goal.tiers })
@@ -893,7 +893,7 @@ function saveNote() {
       (document.getElementById('notesInput')?.value || '').trim();
     
     // Sync to server
-    fetch(`/api/goals/${goalId}/`, {
+    fetch(`/api/goals/${parseInt(goalId)}/`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title: goal.title, tiers: goal.tiers })
@@ -907,7 +907,7 @@ function saveNote() {
 //  Delete
 // ================================================================
 function openDeleteModal(goalId) {
-  deletingGoalId = parseInt(goalId);
+  deletingGoalId = goalId;
   setEl('txt-delete-heading', t('delete.goal'));
   setEl('txt-delete-confirm', t('delete.confirm'));
   setEl('txt-cancel', t('cancel'));
@@ -926,7 +926,7 @@ async function confirmDelete() {
   if (!deletingGoalId) return;
   
   try {
-    await fetch(`/api/goals/${deletingGoalId}/delete/`, { method: 'DELETE' });
+    await fetch(`/api/goals/${parseInt(deletingGoalId)}/delete/`, { method: 'DELETE' });
   } catch (err) {
     console.error('Failed to delete from server');
   }
@@ -989,7 +989,7 @@ async function createGoal() {
     
     const data = await response.json();
     const goal = {
-      id: data.goal.id,
+      id: String(data.goal.id),
       title: data.goal.title,
       createdAt: new Date(data.goal.created_at).getTime(),
       status: 'active',
