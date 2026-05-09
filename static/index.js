@@ -813,7 +813,14 @@ function toggleQuest(goalId, tierIdx, questIdx) {
   quest.completed = !quest.completed;
 
   checkTierCompletion(goal, tierIdx);
-  saveState();
+  
+  // Sync to server
+  fetch(`/api/goals/${goalId}/`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: goal.title, tiers: goal.tiers })
+  }).catch(err => console.error('Failed to sync quest:', err));
+  
   renderMain();
   renderSidebar();
 }
@@ -884,7 +891,13 @@ function saveNote() {
   if (goal) {
     goal.tiers[tierIdx].quests[questIdx].notes =
       (document.getElementById('notesInput')?.value || '').trim();
-    saveState();
+    
+    // Sync to server
+    fetch(`/api/goals/${goalId}/`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: goal.title, tiers: goal.tiers })
+    }).catch(err => console.error('Failed to sync note:', err));
   }
   closeNotesModal();
   renderMain();
