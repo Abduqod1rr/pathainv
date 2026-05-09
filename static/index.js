@@ -521,7 +521,7 @@ function goalColor(title) {
 function activeGoals()   { return state.goals.filter(g => g.status !== 'archived'); }
 function archivedGoals() { return state.goals.filter(g => g.status === 'archived'); }
 
-function getGoal(id) { return state.goals.find(g => g.id === id) || null; }
+function getGoal(id) { return state.goals.find(g => g.id == id) || null; }
 
 function totalProgress(goal) {
   const total = goal.tiers.reduce((a, t) => a + t.quests.length, 0);
