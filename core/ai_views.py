@@ -3,9 +3,25 @@ from django.views.decorators.csrf import csrf_exempt
 from groq import Groq
 from django.conf import settings
 import json
+import re
 import logging
 
 logger = logging.getLogger(__name__)
+
+def clean_json_string(text):
+    text = text.strip()
+    if text.startswith("```json"):
+        text = text[7:]
+    elif text.startswith("```"):
+        text = text[3:]
+    if text.endswith("```"):
+        text = text[:-3]
+    text = text.strip()
+    
+    text = re.sub(r',\s*\]', ']', text)
+    text = re.sub(r',\s*\}', '}', text)
+    
+    return text
 
 @csrf_exempt
 def generate_roadmap(request):
@@ -44,6 +60,7 @@ Rules:
 - Each tier has exactly 10 concrete, actionable quests
 - Tier titles should be short and descriptive (e.g. "Tier 1: Foundations")
 - Quests should be specific to the goal
+- IMPORTANT: Output valid JSON only - NO trailing commas
 
 Respond with ONLY valid JSON (no markdown), format:
 {{"tiers":[
@@ -63,16 +80,9 @@ Respond with ONLY valid JSON (no markdown), format:
         )
         
         content = response.choices[0].message.content.strip()
+        content = clean_json_string(content)
         
-        # Extract JSON
-        if content.startswith("```json"):
-            content = content[7:]
-        elif content.startswith("```"):
-            content = content[3:]
-        if content.endswith("```"):
-            content = content[:-3]
-        
-        result = json.loads(content.strip())
+        result = json.loads(content)
         
         # Validate and normalize
         if not isinstance(result.get('tiers'), list):
