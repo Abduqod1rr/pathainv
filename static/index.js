@@ -142,13 +142,10 @@ function loadState() {
 async function loadGoalsFromServer() {
   try {
     const response = await fetch('/api/goals/');
-    console.log('loadGoalsFromServer response:', response.ok);
     if (response.ok) {
       const text = await response.text();
-      console.log('loadGoalsFromServer response text length:', text.length);
       try {
         const data = JSON.parse(text);
-        console.log('Parsed successfully, goals count:', data.goals?.length);
         state.goals = [];
         if (data.goals && data.goals.length > 0) {
           state.goals = data.goals.map(g => ({
@@ -159,8 +156,16 @@ async function loadGoalsFromServer() {
             currentTier: g.currentTier || 0,
             tiers: g.tiers || []
           }));
-          console.log('state.goals after loading:', state.goals);
         }
+      } catch (parseErr) {
+        console.error('JSON parse error:', parseErr.message);
+        state.goals = [];
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load goals from server:', err);
+  }
+}
       } catch (parseErr) {
         console.error('JSON parse error:', parseErr.message);
         console.error('Response text (first 500 chars):', text.substring(0, 500));
@@ -188,23 +193,17 @@ function deepMerge(target, source) {
 //  Boot
 // ================================================================
 window.onload = async () => {
-  console.log('=== APP BOOTING ===');
   loadState();
-  console.log('state.userId:', state.userId);
   
-  // Check if user is logged in on server
   if (state.userId) {
     await checkAuth();
   }
-  console.log('isAuthenticated:', isAuthenticated);
   
   if (!isAuthenticated) {
-    console.log('Showing auth modal');
     showAuthModal();
     return;
   }
   
-  // Load goals from server
   await loadGoalsFromServer();
   
   applyTheme();
@@ -214,7 +213,6 @@ window.onload = async () => {
   initEsc();
   syncDrawerUI();
   navigate('home');
-  console.log('=== APP READY ===');
 };
 
 // ================================================================
@@ -729,12 +727,8 @@ function renderMain() {
 //  Goal Detail
 // ================================================================
 function openGoal(goalId) {
-  console.log('openGoal called with:', goalId, typeof goalId);
   currentGoalId = Number(goalId);
-  console.log('currentGoalId set to:', currentGoalId, typeof currentGoalId);
-  console.log('state.goals:', state.goals);
   const goal = getGoal(currentGoalId);
-  console.log('getGoal result:', goal);
   if (!goal) return;
   currentTierIdx = goal.currentTier || 0;
   renderSidebar();
@@ -827,18 +821,14 @@ function selectTier(idx) {
 //  Toggle Quest
 // ================================================================
 function toggleQuest(goalId, tierIdx, questIdx) {
-  console.log('toggleQuest:', goalId, tierIdx, questIdx);
   const goal = getGoal(goalId);
-  console.log('toggleQuest goal:', goal);
   if (!goal) return;
 
   const quest = goal.tiers[tierIdx].quests[questIdx];
   quest.completed = !quest.completed;
-  console.log('quest now:', quest.completed);
 
   checkTierCompletion(goal, tierIdx);
   
-  // Sync to server
   fetch(`/api/goals/${parseInt(goalId)}/`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -931,15 +921,37 @@ function saveNote() {
 //  Delete
 // ================================================================
 function openDeleteModal(goalId) {
-  console.log('openDeleteModal goalId:', goalId, typeof goalId);
   deletingGoalId = Number(goalId);
-  console.log('deletingGoalId set to:', deletingGoalId);
   setEl('txt-delete-heading', t('delete.goal'));
   setEl('txt-delete-confirm', t('delete.confirm'));
   setEl('txt-cancel', t('cancel'));
   setEl('txt-delete', t('delete'));
   show('deleteOverlay');
   show('deleteModal');
+}
+
+function closeDeleteModal() {
+  deletingGoalId = null;
+  hide('deleteOverlay');
+  hide('deleteModal');
+}
+
+async function confirmDelete() {
+  if (!deletingGoalId) return;
+  
+  try {
+    await fetch(`/api/goals/${parseInt(deletingGoalId)}/delete/`, { method: 'DELETE' });
+  } catch (err) {
+    console.error('Failed to delete from server');
+  }
+  
+  const goalIdNum = Number(deletingGoalId);
+  state.goals = state.goals.filter(g => g.id !== goalIdNum);
+  if (currentGoalId === goalIdNum) currentGoalId = null;
+  deletingGoalId = null;
+  closeDeleteModal();
+  renderSidebar();
+  renderMain();
 }
 
 function closeDeleteModal() {
