@@ -4,6 +4,15 @@
    Modified to use Django backend for AI
 =============================================================== */
 
+// Immediate debug - show on screen if JS runs
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM ready, checking for main-content...');
+  var main = document.getElementById('main-content');
+  if (main) {
+    main.innerHTML = '<div style="padding:20px;color:#8b5cf6">Pathai loading... (JS works!)</div>';
+  }
+});
+
 // Debug - verify JS is loading
 window.onerror = function(msg, url, line) {
   document.write('<pre style="color:red">JS Error: ' + msg + ' line:' + line + '</pre>');
