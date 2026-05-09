@@ -180,14 +180,18 @@ function deepMerge(target, source) {
 //  Boot
 // ================================================================
 window.onload = async () => {
+  console.log('=== APP BOOTING ===');
   loadState();
+  console.log('state.userId:', state.userId);
   
   // Check if user is logged in on server
   if (state.userId) {
     await checkAuth();
   }
+  console.log('isAuthenticated:', isAuthenticated);
   
   if (!isAuthenticated) {
+    console.log('Showing auth modal');
     showAuthModal();
     return;
   }
@@ -202,6 +206,7 @@ window.onload = async () => {
   initEsc();
   syncDrawerUI();
   navigate('home');
+  console.log('=== APP READY ===');
 };
 
 // ================================================================
