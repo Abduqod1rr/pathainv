@@ -562,7 +562,7 @@ function goalColor(title) {
 function activeGoals()   { return state.goals.filter(g => g.status !== 'archived'); }
 function archivedGoals() { return state.goals.filter(g => g.status === 'archived'); }
 
-function getGoal(id) { return state.goals.find(g => g.id === id) || null; }
+function getGoal(id) { return state.goals.find(g => g.id === Number(id)) || null; }
 
 function totalProgress(goal) {
   const total = goal.tiers.reduce((a, t) => a + t.quests.length, 0);
@@ -827,11 +827,14 @@ function selectTier(idx) {
 //  Toggle Quest
 // ================================================================
 function toggleQuest(goalId, tierIdx, questIdx) {
+  console.log('toggleQuest:', goalId, tierIdx, questIdx);
   const goal = getGoal(goalId);
+  console.log('toggleQuest goal:', goal);
   if (!goal) return;
 
   const quest = goal.tiers[tierIdx].quests[questIdx];
   quest.completed = !quest.completed;
+  console.log('quest now:', quest.completed);
 
   checkTierCompletion(goal, tierIdx);
   
