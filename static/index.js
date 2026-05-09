@@ -148,7 +148,7 @@ async function loadGoalsFromServer() {
       console.log('loadGoalsFromServer response text length:', text.length);
       try {
         const data = JSON.parse(text);
-        console.log('loadGoalsFromServer data:', data);
+        console.log('Parsed successfully, goals count:', data.goals?.length);
         state.goals = [];
         if (data.goals && data.goals.length > 0) {
           state.goals = data.goals.map(g => ({
@@ -156,13 +156,15 @@ async function loadGoalsFromServer() {
             title: g.title,
             createdAt: new Date(g.created_at).getTime(),
             status: 'active',
-            currentTier: 0,
-            tiers: g.tiers
+            currentTier: g.currentTier || 0,
+            tiers: g.tiers || []
           }));
           console.log('state.goals after loading:', state.goals);
         }
       } catch (parseErr) {
-        console.error('JSON parse error:', parseErr);
+        console.error('JSON parse error:', parseErr.message);
+        console.error('Response text (first 500 chars):', text.substring(0, 500));
+        state.goals = [];
       }
     }
   } catch (err) {
