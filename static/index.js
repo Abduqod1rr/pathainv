@@ -955,8 +955,8 @@ async function confirmDelete() {
     console.error('Failed to delete from server');
   }
   
-  state.goals = state.goals.filter(g => g.id !== deletingGoalId);
-  if (currentGoalId === deletingGoalId) currentGoalId = null;
+  state.goals = state.goals.filter(g => g.id !== Number(deletingGoalId));
+  if (currentGoalId === Number(deletingGoalId)) currentGoalId = null;
   deletingGoalId = null;
   closeDeleteModal();
   renderSidebar();
