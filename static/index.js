@@ -136,6 +136,7 @@ function loadState() {
   try {
     const saved = JSON.parse(raw);
     state = deepMerge(state, saved);
+    if (!Array.isArray(state.goals)) state.goals = [];
   } catch(_) {}
 }
 
@@ -194,6 +195,10 @@ function deepMerge(target, source) {
 // ================================================================
 window.onload = async () => {
   loadState();
+  
+  if (!state.goals) state.goals = [];
+  if (!state.settings) state.settings = { language: 'en', theme: 'dark' };
+  if (!state.profile) state.profile = { name: '', surname: '', bio: '', interests: '' };
   
   if (state.userId) {
     await checkAuth();
