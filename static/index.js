@@ -155,30 +155,26 @@ function deepMerge(target, source) {
 //  Boot
 // ================================================================
 window.onload = async () => {
-  console.log('BOOT START');
   loadState();
-  console.log('After loadState - goals:', state.goals, 'userId:', state.userId);
   
   // Ensure goals is always an array
   if (!Array.isArray(state.goals)) {
-    console.log('goals was not array, fixing');
     state.goals = [];
   }
   
-  // Check if user is logged in on server
+  // Show debug on page
+  const main = document.getElementById('main-content');
+  if (main) main.innerHTML = '<div style="padding:20px;color:#8b5cf6">Loading... userId:' + state.userId + ' goals:' + (state.goals?.length||0) + '</div>';
+  
   if (state.userId) {
-    console.log('Checking auth...');
     await checkAuth();
-    console.log('Auth result:', isAuthenticated);
   }
   
   if (!isAuthenticated) {
-    console.log('Showing auth modal');
     showAuthModal();
     return;
   }
   
-  console.log('Initializing app...');
   applyTheme();
   initDrawer();
   initResizer();
@@ -186,7 +182,6 @@ window.onload = async () => {
   initEsc();
   syncDrawerUI();
   navigate('home');
-  console.log('BOOT DONE');
 };
 
 // ================================================================
