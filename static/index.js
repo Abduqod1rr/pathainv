@@ -931,7 +931,9 @@ function saveNote() {
 //  Delete
 // ================================================================
 function openDeleteModal(goalId) {
+  console.log('openDeleteModal goalId:', goalId, typeof goalId);
   deletingGoalId = Number(goalId);
+  console.log('deletingGoalId set to:', deletingGoalId);
   setEl('txt-delete-heading', t('delete.goal'));
   setEl('txt-delete-confirm', t('delete.confirm'));
   setEl('txt-cancel', t('cancel'));
@@ -947,6 +949,8 @@ function closeDeleteModal() {
 }
 
 async function confirmDelete() {
+  console.log('confirmDelete deletingGoalId:', deletingGoalId, typeof deletingGoalId);
+  console.log('state.goals:', state.goals);
   if (!deletingGoalId) return;
   
   try {
@@ -955,8 +959,12 @@ async function confirmDelete() {
     console.error('Failed to delete from server');
   }
   
-  state.goals = state.goals.filter(g => g.id !== Number(deletingGoalId));
-  if (currentGoalId === Number(deletingGoalId)) currentGoalId = null;
+  const goalIdNum = Number(deletingGoalId);
+  console.log('Filtering for id:', goalIdNum);
+  state.goals = state.goals.filter(g => g.id !== goalIdNum);
+  console.log('state.goals after filter:', state.goals);
+  if (currentGoalId === goalIdNum) currentGoalId = null;
+  deletingGoalId = null;
   deletingGoalId = null;
   closeDeleteModal();
   renderSidebar();
