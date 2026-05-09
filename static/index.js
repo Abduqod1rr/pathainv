@@ -154,10 +154,18 @@ function deepMerge(target, source) {
 // ================================================================
 //  Boot
 // ================================================================
-window.onload = () => {
-  console.log('Pathai booting...');
+window.onload = async () => {
   loadState();
-  console.log('State loaded, userId:', state.userId, 'goals:', state.goals?.length);
+  
+  // Check if user is logged in on server
+  if (state.userId) {
+    await checkAuth();
+  }
+  
+  if (!isAuthenticated) {
+    showAuthModal();
+    return;
+  }
   
   applyTheme();
   initDrawer();
@@ -166,7 +174,6 @@ window.onload = () => {
   initEsc();
   syncDrawerUI();
   navigate('home');
-  console.log('Navigation done');
 };
 
 // ================================================================
