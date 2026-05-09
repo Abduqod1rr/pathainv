@@ -14,9 +14,6 @@ def index(request):
 
 
 def login_page(request):
-    if request.user.is_authenticated:
-        from django.shortcuts import redirect
-        return redirect('index')
     return render(request, 'login.html')
 
 
