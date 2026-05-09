@@ -4,6 +4,8 @@
    Modified to use Django backend for AI
 =============================================================== */
 
+console.log('Pathai JS loaded');
+
 // ================================================================
 //  i18n
 // ================================================================
@@ -184,30 +186,40 @@ function deepMerge(target, source) {
 //  Boot
 // ================================================================
 window.onload = async () => {
-  loadState();
-  
-  if (!state.goals) state.goals = [];
-  if (!state.settings) state.settings = { language: 'en', theme: 'dark' };
-  if (!state.profile) state.profile = { name: '', surname: '', bio: '', interests: '' };
-  
-  if (state.userId) {
-    await checkAuth();
+  try {
+    console.log('Boot starting...');
+    loadState();
+    console.log('State loaded, goals:', state.goals);
+    
+    if (!state.goals) state.goals = [];
+    if (!state.settings) state.settings = { language: 'en', theme: 'dark' };
+    if (!state.profile) state.profile = { name: '', surname: '', bio: '', interests: '' };
+    
+    if (state.userId) {
+      await checkAuth();
+    }
+    console.log('Auth checked, isAuthenticated:', isAuthenticated);
+    
+    if (!isAuthenticated) {
+      console.log('Showing auth modal...');
+      showAuthModal();
+      return;
+    }
+    
+    await loadGoalsFromServer();
+    console.log('Goals loaded, state.goals:', state.goals);
+    
+    applyTheme();
+    initDrawer();
+    initResizer();
+    initRipple();
+    initEsc();
+    syncDrawerUI();
+    navigate('home');
+    console.log('Navigation complete');
+  } catch (err) {
+    console.error('BOOT ERROR:', err);
   }
-  
-  if (!isAuthenticated) {
-    showAuthModal();
-    return;
-  }
-  
-  await loadGoalsFromServer();
-  
-  applyTheme();
-  initDrawer();
-  initResizer();
-  initRipple();
-  initEsc();
-  syncDrawerUI();
-  navigate('home');
 };
 
 // ================================================================
