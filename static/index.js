@@ -157,6 +157,11 @@ function deepMerge(target, source) {
 window.onload = async () => {
   loadState();
   
+  // Ensure goals is always an array
+  if (!Array.isArray(state.goals)) {
+    state.goals = [];
+  }
+  
   // Check if user is logged in on server
   if (state.userId) {
     await checkAuth();
