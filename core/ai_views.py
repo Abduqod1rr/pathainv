@@ -18,8 +18,15 @@ def clean_json_string(text):
         text = text[:-3]
     text = text.strip()
     
-    text = re.sub(r',\s*\]', ']', text)
-    text = re.sub(r',\s*\}', '}', text)
+    # Remove trailing commas more aggressively
+    text = re.sub(r',(\s*[\]\}])', r'\1', text)
+    # Remove any remaining commas before closing brackets
+    text = re.sub(r',(\s*\])', ']', text)
+    text = re.sub(r',(\s*\})', '}', text)
+    
+    # Try to fix common JSON issues
+    # Remove multiple commas
+    text = re.sub(r',{2,}', ',', text)
     
     return text
 
@@ -82,7 +89,12 @@ Respond with ONLY valid JSON (no markdown), format:
         content = response.choices[0].message.content.strip()
         content = clean_json_string(content)
         
-        result = json.loads(content)
+        try:
+            result = json.loads(content)
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON parse failed after cleaning: {e}")
+            logger.error(f"Content was: {content[:500]}")
+            return JsonResponse({'error': 'Invalid JSON from AI - please try again'}, status=500)
         
         # Validate and normalize
         if not isinstance(result.get('tiers'), list):
