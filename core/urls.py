@@ -5,6 +5,7 @@ from . import ai_views
 urlpatterns = [
     path('', views.index, name='index'),
     path('login/', views.login_page, name='login_page'),
+    path('register/', views.login_page, name='register_page'),
     path('api/register/', views.register, name='register'),
     path('api/login/', views.login_view, name='login'),
     path('api/logout/', views.logout_view, name='logout'),
