@@ -144,19 +144,25 @@ async function loadGoalsFromServer() {
     const response = await fetch('/api/goals/');
     console.log('loadGoalsFromServer response:', response.ok);
     if (response.ok) {
-      const data = await response.json();
-      console.log('loadGoalsFromServer data:', data);
-      state.goals = [];
-      if (data.goals && data.goals.length > 0) {
-        state.goals = data.goals.map(g => ({
-          id: g.id,
-          title: g.title,
-          createdAt: new Date(g.created_at).getTime(),
-          status: 'active',
-          currentTier: 0,
-          tiers: g.tiers
-        }));
-        console.log('state.goals after loading:', state.goals);
+      const text = await response.text();
+      console.log('loadGoalsFromServer response text length:', text.length);
+      try {
+        const data = JSON.parse(text);
+        console.log('loadGoalsFromServer data:', data);
+        state.goals = [];
+        if (data.goals && data.goals.length > 0) {
+          state.goals = data.goals.map(g => ({
+            id: g.id,
+            title: g.title,
+            createdAt: new Date(g.created_at).getTime(),
+            status: 'active',
+            currentTier: 0,
+            tiers: g.tiers
+          }));
+          console.log('state.goals after loading:', state.goals);
+        }
+      } catch (parseErr) {
+        console.error('JSON parse error:', parseErr);
       }
     }
   } catch (err) {
