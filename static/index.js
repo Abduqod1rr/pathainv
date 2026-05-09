@@ -162,10 +162,6 @@ window.onload = async () => {
     state.goals = [];
   }
   
-  // Show debug on page
-  const main = document.getElementById('main-content');
-  if (main) main.innerHTML = '<div style="padding:20px;color:#8b5cf6">Loading... userId:' + state.userId + ' goals:' + (state.goals?.length||0) + '</div>';
-  
   if (state.userId) {
     await checkAuth();
   }
