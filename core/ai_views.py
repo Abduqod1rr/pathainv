@@ -55,7 +55,7 @@ def generate_roadmap(request):
         
         context_str = '\n'.join(context_parts) if context_parts else 'No specific profile info'
         
-        prompt = f"""You are an expert goal-achievement coach. Create a structured 10-tier learning roadmap.
+        prompt = f"""You are an expert goal-achievement coach. Create a structured 10-tier learning roadmap. Answer in input's language
 
 User Profile:
 {context_str}
