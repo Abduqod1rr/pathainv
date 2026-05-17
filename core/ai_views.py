@@ -55,7 +55,7 @@ def generate_roadmap(request):
         
         context_str = '\n'.join(context_parts) if context_parts else 'No specific profile info'
         
-        prompt = f"""You are an expert goal-achievement coach. Create a structured 10-tier learning roadmap. Answer in input's language
+        prompt = f"""You are an expert goal-achievement coach. Create a structured 10-tier learning roadmap. Answer with language that inpuut given in.
 
 User Profile:
 {context_str}
@@ -79,7 +79,7 @@ Respond with ONLY valid JSON (no markdown), format:
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[
-                {"role": "system", "content": "You are a helpful AI that generates learning roadmaps."},
+                {"role": "system", "content": "You are a helpful AI that generates learning roadmaps. Answer with language that inpuut given in."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.8,
@@ -94,7 +94,7 @@ Respond with ONLY valid JSON (no markdown), format:
         except json.JSONDecodeError as e:
             logger.error(f"JSON parse failed after cleaning: {e}")
             logger.error(f"Content was: {content[:500]}")
-            return JsonResponse({'error': 'Invalid JSON from AI - please try again'}, status=500)
+            return JsonResponse({'error': 'Invalid JleaSON from AI - pse try again'}, status=500)
         
         # Validate and normalize
         if not isinstance(result.get('tiers'), list):

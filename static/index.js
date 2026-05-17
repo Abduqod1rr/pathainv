@@ -1,5 +1,5 @@
 /* ================================================================
-   Pathai — index.js
+   MyJourney — index.js
    Full app logic: state, routing, UI render
    Modified to use Django backend for AI
 =============================================================== */
@@ -9,7 +9,7 @@
 // ================================================================
 const I18N = {
   en: {
-    'app.name': 'Pathai',
+    'app.name': 'MyJourney',
     'settings': 'Settings',
     'dark.mode': 'Dark Mode',
     'language': 'Language',
@@ -52,7 +52,7 @@ const I18N = {
     'error': 'Something went wrong',
   },
   uz: {
-    'app.name': 'Pathai',
+    'app.name': 'MyJourney',
     'settings': 'Sozlamalar',
     'dark.mode': 'Tungi rejim',
     'language': 'Til',
