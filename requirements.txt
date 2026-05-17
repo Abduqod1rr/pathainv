@@ -6,3 +6,4 @@ groq>=0.4
 gunicorn>=21.0
 whitenoise>=6.0
 dj-database-url>=2.0
+django-cors-headers>=4.0
