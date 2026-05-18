@@ -163,7 +163,40 @@ def update_goal(request, goal_id):
         if 'title' in data:
             goal.title = data['title']
         if 'tiers' in data:
+            # Count completed quests before update
+            old_completed = sum(
+                sum(1 for q in t.get('quests', []) if q.get('completed'))
+                for t in goal.tiers
+            )
+            
             goal.tiers = data['tiers']
+            
+            # Count completed quests after update
+            new_completed = sum(
+                sum(1 for q in t.get('quests', []) if q.get('completed'))
+                for t in data['tiers']
+            )
+            
+            # If new quests completed, update stats
+            if new_completed > old_completed:
+                diff = new_completed - old_completed
+                try:
+                    stats = request.user.stats
+                    stats.quests_completed += diff
+                    stats.weekly_quests += diff
+                    stats.total_points += diff * 10
+                    
+                    # Check if goal is fully completed
+                    total_quests = sum(len(t.get('quests', [])) for t in data['tiers'])
+                    if new_completed == total_quests and total_quests > 0:
+                        # Goal completed!
+                        stats.goals_completed += 1
+                        stats.weekly_goals += 1
+                        stats.total_points += 100
+                    
+                    stats.save()
+                except:
+                    pass
         
         goal.save()
         
@@ -199,3 +232,77 @@ def delete_goal(request, goal_id):
         return JsonResponse({'error': 'Goal not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+from django.utils import timezone
+from datetime import timedelta
+
+
+def get_leaderboard(request):
+    from .models import UserStats
+    
+    # Get start of week (Monday)
+    today = timezone.now().date()
+    week_start = today - timedelta(days=today.weekday())
+    
+    # Update weekly stats for all users if week changed
+    stats = UserStats.objects.all()
+    for s in stats:
+        if s.week_start < week_start:
+            s.weekly_goals = 0
+            s.weekly_quests = 0
+            s.week_start = week_start
+            s.save()
+    
+    # All-time leaderboard
+    all_time = UserStats.objects.select_related('user').order_by('-goals_completed', '-quests_completed')[:20]
+    all_time_data = [
+        {
+            'username': s.user.username,
+            'goals_completed': s.goals_completed,
+            'quests_completed': s.quests_completed,
+            'points': s.total_points
+        }
+        for s in all_time
+    ]
+    
+    # Weekly leaderboard
+    weekly = UserStats.objects.select_related('user').order_by('-weekly_goals', '-weekly_quests')[:20]
+    weekly_data = [
+        {
+            'username': s.user.username,
+            'goals_completed': s.weekly_goals,
+            'quests_completed': s.weekly_quests,
+            'points': s.weekly_goals * 100 + s.weekly_quests * 10
+        }
+        for s in weekly
+    ]
+    
+    return JsonResponse({
+        'all_time': all_time_data,
+        'weekly': weekly_data
+    })
+
+
+def update_stats_on_quest_complete(user):
+    from .models import UserStats
+    try:
+        stats = user.stats
+        stats.quests_completed += 1
+        stats.weekly_quests += 1
+        stats.total_points += 10
+        stats.save()
+    except UserStats.DoesNotExist:
+        pass
+
+
+def update_stats_on_goal_complete(user):
+    from .models import UserStats
+    try:
+        stats = user.stats
+        stats.goals_completed += 1
+        stats.weekly_goals += 1
+        stats.total_points += 100
+        stats.save()
+    except UserStats.DoesNotExist:
+        pass

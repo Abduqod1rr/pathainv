@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class User(AbstractUser):
@@ -25,3 +28,22 @@ class Goal(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class UserStats(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='stats')
+    goals_completed = models.IntegerField(default=0)
+    quests_completed = models.IntegerField(default=0)
+    weekly_goals = models.IntegerField(default=0)
+    weekly_quests = models.IntegerField(default=0)
+    week_start = models.DateField(default=timezone.now)
+    total_points = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.user.username} Stats"
+
+
+@receiver(post_save, sender=User)
+def create_user_stats(sender, instance, created, **kwargs):
+    if created:
+        UserStats.objects.create(user=instance)

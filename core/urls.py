@@ -15,4 +15,5 @@ urlpatterns = [
     path('api/goals/<int:goal_id>/', views.update_goal, name='update_goal'),
     path('api/goals/<int:goal_id>/delete/', views.delete_goal, name='delete_goal'),
     path('api/generate-roadmap/', ai_views.generate_roadmap, name='generate_roadmap'),
+    path('api/leaderboard/', views.get_leaderboard, name='leaderboard'),
 ]
