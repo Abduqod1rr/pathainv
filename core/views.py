@@ -108,7 +108,7 @@ def get_goals(request):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Not authenticated'}, status=401)
     
-    goals = Goal.objects.filter(user=request.user).values('id', 'title', 'tiers', 'created_at', 'updated_at')
+    goals = Goal.objects.filter(user=request.user).values('id', 'title', 'tiers', 'current_tier', 'created_at', 'updated_at')
     return JsonResponse({'goals': list(goals)})
 
 
@@ -131,7 +131,8 @@ def create_goal(request):
         goal = Goal.objects.create(
             user=request.user,
             title=title,
-            tiers=tiers
+            tiers=tiers,
+            current_tier=0
         )
         
         return JsonResponse({
@@ -140,6 +141,7 @@ def create_goal(request):
                 'id': goal.id,
                 'title': goal.title,
                 'tiers': goal.tiers,
+                'current_tier': goal.current_tier,
                 'created_at': goal.created_at.isoformat(),
                 'updated_at': goal.updated_at.isoformat()
             }
@@ -162,6 +164,8 @@ def update_goal(request, goal_id):
         
         if 'title' in data:
             goal.title = data['title']
+        if 'current_tier' in data:
+            goal.current_tier = data['current_tier']
         if 'tiers' in data:
             # Count completed quests before update
             old_completed = sum(
@@ -206,6 +210,7 @@ def update_goal(request, goal_id):
                 'id': goal.id,
                 'title': goal.title,
                 'tiers': goal.tiers,
+                'current_tier': goal.current_tier,
                 'created_at': goal.created_at.isoformat(),
                 'updated_at': goal.updated_at.isoformat()
             }

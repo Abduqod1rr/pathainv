@@ -166,7 +166,7 @@ async function loadGoalsFromServer() {
         title: g.title,
         createdAt: new Date(g.created_at).getTime(),
         status: 'active',
-        currentTier: g.currentTier || 0,
+        currentTier: g.current_tier !== undefined ? g.current_tier : 0,
         tiers: g.tiers || []
       }));
     }
@@ -916,7 +916,7 @@ function toggleQuest(goalId, tierIdx, questIdx) {
   fetch(`/api/goals/${Number(goalId)}/`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title: goal.title, tiers: goal.tiers })
+    body: JSON.stringify({ title: goal.title, tiers: goal.tiers, current_tier: goal.currentTier })
   }).catch(err => console.error('Failed to sync:', err));
   
   renderMain();
