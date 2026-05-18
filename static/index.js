@@ -708,9 +708,6 @@ function renderSidebar() {
         <div style="font-weight:600; font-size:16px; margin-bottom:4px">${esc(p.name)} ${esc(p.surname)}</div>
         <div style="font-size:13px; color:var(--text-3); line-height:1.5">${esc(p.interests || '')}</div>
       </div>`;
-  } else {
-    // leaderboard and other pages - just show header with no goals
-    sb.innerHTML = `<div class="sb-header"><span class="sb-brand">${t('app.name')}</span></div>`;
   }
 }
 
