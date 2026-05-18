@@ -43,7 +43,9 @@ def generate_roadmap(request):
         if not goal_title:
             return JsonResponse({'error': 'No goal title'}, status=400)
         
-        client = Groq(api_key=settings.GROQ_API_KEY)
+        api_keys = settings.GROQ_API_KEYS
+        if not api_keys:
+            return JsonResponse({'error': 'No API keys configured'}, status=500)
         
         context_parts = []
         if profile.get('name'):
@@ -55,7 +57,7 @@ def generate_roadmap(request):
         
         context_str = '\n'.join(context_parts) if context_parts else 'No specific profile info'
         
-        prompt = f"""You are an expert goal-achievement coach. Create a structured 10-tier learning roadmap. Answer with language that inpuut given in.
+        prompt = f"""You are an expert goal-achievement coach. Create a structured 10-tier learning roadmap.
 
 User Profile:
 {context_str}
@@ -76,32 +78,58 @@ Respond with ONLY valid JSON (no markdown), format:
   ...10 tiers total...
 ]}}"""
 
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {"role": "system", "content": "You are a helpful AI that generates learning roadmaps. Answer with language that inpuut given in."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.8,
-            max_tokens=8000
-        )
+        # Try each API key in sequence
+        last_error = None
+        for api_key in api_keys:
+            try:
+                client = Groq(api_key=api_key)
+                
+                response = client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful AI that generates learning roadmaps."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.8,
+                    max_tokens=8000
+                )
+                
+                content = response.choices[0].message.content.strip()
+                content = clean_json_string(content)
+                
+                try:
+                    result = json.loads(content)
+                except json.JSONDecodeError as e:
+                    logger.error(f"JSON parse failed after cleaning: {e}")
+                    continue  # Try next key
+                
+                # Validate and normalize
+                if not isinstance(result.get('tiers'), list):
+                    continue  # Try next key
+                
+                logger.info(f"Generated roadmap for goal: {goal_title}")
+                return JsonResponse(result)
+                
+            except Exception as e:
+                error_str = str(e)
+                # Check if it's a rate limit error (429)
+                if '429' in error_str or 'rate_limit' in error_str.lower():
+                    logger.warning(f"API key rate limited, trying next key")
+                    last_error = 'All API keys rate limited'
+                    continue  # Try next key
+                last_error = e
+                continue
         
-        content = response.choices[0].message.content.strip()
-        content = clean_json_string(content)
+        # All keys failed
+        logger.error(f"All API keys failed. Last error: {last_error}")
+        return JsonResponse({'error': 'All API keys failed. Please try again later.'}, status=500)
         
-        try:
-            result = json.loads(content)
-        except json.JSONDecodeError as e:
-            logger.error(f"JSON parse failed after cleaning: {e}")
-            logger.error(f"Content was: {content[:500]}")
-            return JsonResponse({'error': 'Invalid JleaSON from AI - pse try again'}, status=500)
-        
-        # Validate and normalize
-        if not isinstance(result.get('tiers'), list):
-            raise ValueError('Invalid response format')
-        
-        logger.info(f"Generated roadmap for goal: {goal_title}")
-        return JsonResponse(result)
+except json.JSONDecodeError as e:
+        logger.error(f"JSON decode error: {e}")
+        return JsonResponse({'error': 'Invalid JSON from AI', 'details': str(e)}, status=500)
+    except Exception as e:
+        logger.error(f"AI error: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
         
     except json.JSONDecodeError as e:
         logger.error(f"JSON decode error: {e}")

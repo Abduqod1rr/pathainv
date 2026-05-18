@@ -100,4 +100,8 @@ REST_FRAMEWORK = {
     ],
 }
 
-GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
+# Multiple Groq API Keys (comma-separated)
+GROQ_API_KEYS = [k.strip() for k in os.getenv('GROQ_API_KEYS', '').split(',') if k.strip()]
+# Fallback to single key for backwards compatibility
+if not GROQ_API_KEYS and os.getenv('GROQ_API_KEY'):
+    GROQ_API_KEYS = [os.getenv('GROQ_API_KEY')]
