@@ -244,11 +244,16 @@ from datetime import timedelta
 
 
 def get_leaderboard(request):
-    from .models import UserStats
+    from .models import User, UserStats
     
     # Get start of week (Monday)
     today = timezone.now().date()
     week_start = today - timedelta(days=today.weekday())
+    
+    # Create stats for users who don't have them
+    users_without_stats = User.objects.filter(stats__isnull=True)
+    for user in users_without_stats:
+        UserStats.objects.create(user=user, week_start=week_start)
     
     # Update weekly stats for all users if week changed
     stats = UserStats.objects.all()
@@ -259,7 +264,7 @@ def get_leaderboard(request):
             s.week_start = week_start
             s.save()
     
-    # All-time leaderboard
+    # All-time leaderboard (show all users with stats)
     all_time = UserStats.objects.select_related('user').order_by('-goals_completed', '-quests_completed')[:20]
     all_time_data = [
         {
