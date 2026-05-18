@@ -8,6 +8,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def clean_json_string(text):
     text = text.strip()
     if text.startswith("```json"):
@@ -18,17 +19,13 @@ def clean_json_string(text):
         text = text[:-3]
     text = text.strip()
     
-    # Remove trailing commas more aggressively
     text = re.sub(r',(\s*[\]\}])', r'\1', text)
-    # Remove any remaining commas before closing brackets
     text = re.sub(r',(\s*\])', ']', text)
     text = re.sub(r',(\s*\})', '}', text)
-    
-    # Try to fix common JSON issues
-    # Remove multiple commas
     text = re.sub(r',{2,}', ',', text)
     
     return text
+
 
 @csrf_exempt
 def generate_roadmap(request):
@@ -78,7 +75,6 @@ Respond with ONLY valid JSON (no markdown), format:
   ...10 tiers total...
 ]}}"""
 
-        # Try each API key in sequence
         last_error = None
         for api_key in api_keys:
             try:
@@ -97,39 +93,25 @@ Respond with ONLY valid JSON (no markdown), format:
                 content = response.choices[0].message.content.strip()
                 content = clean_json_string(content)
                 
-                try:
-                    result = json.loads(content)
-                except json.JSONDecodeError as e:
-                    logger.error(f"JSON parse failed after cleaning: {e}")
-                    continue  # Try next key
+                result = json.loads(content)
                 
-                # Validate and normalize
                 if not isinstance(result.get('tiers'), list):
-                    continue  # Try next key
+                    continue
                 
                 logger.info(f"Generated roadmap for goal: {goal_title}")
                 return JsonResponse(result)
                 
             except Exception as e:
                 error_str = str(e)
-                # Check if it's a rate limit error (429)
                 if '429' in error_str or 'rate_limit' in error_str.lower():
                     logger.warning(f"API key rate limited, trying next key")
                     last_error = 'All API keys rate limited'
-                    continue  # Try next key
+                    continue
                 last_error = e
                 continue
         
-        # All keys failed
         logger.error(f"All API keys failed. Last error: {last_error}")
         return JsonResponse({'error': 'All API keys failed. Please try again later.'}, status=500)
-        
-except json.JSONDecodeError as e:
-        logger.error(f"JSON decode error: {e}")
-        return JsonResponse({'error': 'Invalid JSON from AI', 'details': str(e)}, status=500)
-    except Exception as e:
-        logger.error(f"AI error: {e}")
-        return JsonResponse({'error': str(e)}, status=500)
         
     except json.JSONDecodeError as e:
         logger.error(f"JSON decode error: {e}")
