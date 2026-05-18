@@ -1028,3 +1028,59 @@ input:checked + .slider::before { transform: translateX(20px); }
   .quest-area { padding: 16px 18px; }
   .goal-detail-header { padding: 16px 18px; flex-wrap: wrap; }
 }
+
+/* ================================================================
+   Leaderboard
+=============================================================== */
+.leaderboard-page { padding: 24px; }
+.leaderboard-page .page-title { margin-bottom: 20px; font-size: 24px; font-weight: 600; }
+.lb-tabs { display: flex; gap: 12px; margin-bottom: 20px; }
+.lb-tab {
+  padding: 10px 20px;
+  border: none;
+  background: var(--bg-2);
+  color: var(--text-2);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+.lb-tab.active { background: var(--accent); color: white; }
+.lb-list { display: flex; flex-direction: column; gap: 8px; }
+.lb-row {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--bg-2);
+  border-radius: 10px;
+  gap: 16px;
+}
+.lb-row.gold { background: linear-gradient(135deg, #FFD70022, #FFA50022); border: 1px solid #FFD700; }
+.lb-row.silver { background: linear-gradient(135deg, #C0C0C022, #A0A0A022); border: 1px solid #C0C0C0; }
+.lb-row.bronze { background: linear-gradient(135deg, #CD7F3222, #8B451322); border: 1px solid #CD7F32; }
+.lb-rank {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-3);
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-2);
+}
+.lb-row.gold .lb-rank { background: #FFD700; color: #000; }
+.lb-row.silver .lb-rank { background: #C0C0C0; color: #000; }
+.lb-row.bronze .lb-rank { background: #CD7F32; color: #000; }
+.lb-user { flex: 1; font-weight: 600; font-size: 15px; }
+.lb-stats { display: flex; gap: 16px; }
+.lb-goals, .lb-quests, .lb-points {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.lb-points { color: var(--accent); font-weight: 600; }

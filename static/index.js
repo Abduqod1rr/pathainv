@@ -50,6 +50,12 @@ const I18N = {
     'profile.saved': 'Profile saved ✓',
     'completed': 'Completed',
     'error': 'Something went wrong',
+    'leaderboard': 'Leaderboard',
+    'weekly': 'Weekly',
+    'all_time': 'All Time',
+    'rank': 'Rank',
+    'points': 'Points',
+    'no_data': 'No data yet',
   },
   uz: {
     'app.name': 'MyJourney',
@@ -93,6 +99,12 @@ const I18N = {
     'profile.saved': 'Profil saqlandi ✓',
     'completed': 'Tugallandi',
     'error': 'Xatolik yuz berdi',
+    'leaderboard': 'Reyting',
+    'weekly': 'Haftalik',
+    'all_time': 'Umumiy',
+    'rank': 'O\'rin',
+    'points': 'Ballar',
+    'no_data': 'Ma\'lumot yo\'q',
   }
 };
 
@@ -543,6 +555,62 @@ function navigate(pageId) {
 }
 
 // ================================================================
+//  Leaderboard
+// ================================================================
+let currentLeaderboardType = 'weekly';
+let leaderboardData = { weekly: [], all_time: [] };
+
+function switchLeaderboard(type) {
+  currentLeaderboardType = type;
+  document.getElementById('tab-weekly').classList.toggle('active', type === 'weekly');
+  document.getElementById('tab-all').classList.toggle('active', type === 'all_time');
+  renderLeaderboard();
+}
+
+async function loadLeaderboard(type) {
+  try {
+    const response = await fetch('/api/leaderboard/');
+    if (response.ok) {
+      const data = await response.json();
+      leaderboardData = {
+        weekly: data.weekly || [],
+        all_time: data.all_time || []
+      };
+      renderLeaderboard();
+    }
+  } catch (err) {
+    console.error('Failed to load leaderboard:', err);
+    document.getElementById('leaderboard-list').innerHTML = `<div class="empty-state"><p>${t('no_data')}</p></div>`;
+  }
+}
+
+function renderLeaderboard() {
+  const list = document.getElementById('leaderboard-list');
+  const data = leaderboardData[currentLeaderboardType] || [];
+  
+  if (!data.length) {
+    list.innerHTML = `<div class="empty-state"><p>${t('no_data')}</p></div>`;
+    return;
+  }
+  
+  const rows = data.map((user, idx) => {
+    const rankClass = idx === 0 ? 'gold' : idx === 1 ? 'silver' : idx === 2 ? 'bronze' : '';
+    return `
+      <div class="lb-row ${rankClass}">
+        <div class="lb-rank">${idx + 1}</div>
+        <div class="lb-user">${esc(user.username)}</div>
+        <div class="lb-stats">
+          <span class="lb-goals"><i class="fas fa-bullseye"></i> ${user.goals_completed}</span>
+          <span class="lb-quests"><i class="fas fa-check"></i> ${user.quests_completed}</span>
+          <span class="lb-points"><i class="fas fa-star"></i> ${user.points}</span>
+        </div>
+      </div>`;
+  }).join('');
+  
+  list.innerHTML = rows;
+}
+
+// ================================================================
 //  Helpers
 // ================================================================
 function esc(s) {
@@ -685,6 +753,20 @@ function renderMain() {
         </div>`).join('');
       main.innerHTML = `<div class="archive-page"><h2 class="page-title">${t('archive')}</h2>${cards}</div>`;
     }
+
+  } else if (currentPage === 'leaderboard') {
+    main.innerHTML = `
+      <div class="leaderboard-page">
+        <h2 class="page-title">${t('leaderboard')}</h2>
+        <div class="lb-tabs">
+          <button class="lb-tab active" onclick="switchLeaderboard('weekly')" id="tab-weekly">${t('weekly')}</button>
+          <button class="lb-tab" onclick="switchLeaderboard('all_time')" id="tab-all">${t('all_time')}</button>
+        </div>
+        <div class="lb-list" id="leaderboard-list">
+          <div class="loading">${t('generating')}</div>
+        </div>
+      </div>`;
+    loadLeaderboard('weekly');
 
   } else if (currentPage === 'profile') {
     const p = state.profile;
