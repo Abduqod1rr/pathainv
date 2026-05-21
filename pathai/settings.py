@@ -102,6 +102,7 @@ REST_FRAMEWORK = {
 
 # Multiple Groq API Keys (comma-separated)
 GROQ_API_KEYS = [k.strip() for k in os.getenv('GROQ_API_KEYS', '').split(',') if k.strip()]
-# Fallback to single key for backwards compatibility
-if not GROQ_API_KEYS and os.getenv('GROQ_API_KEY'):
-    GROQ_API_KEYS = [os.getenv('GROQ_API_KEY')]
+# Always include GROQ_API_KEY as fallback/priority
+single_key = os.getenv('GROQ_API_KEY')
+if single_key and single_key not in GROQ_API_KEYS:
+    GROQ_API_KEYS.append(single_key)
